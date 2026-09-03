@@ -21,15 +21,30 @@ interface NavItem {
   name: string;
   path: string;
   icon: React.ElementType;
-  badge?: string;
+  getBadge?: () => string | number | undefined;
 }
+
+const getStoredCount = (key: string, filterPending?: boolean): number => {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return 0;
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return 0;
+    if (filterPending) {
+      return parsed.filter((item: any) => item.status === 'pending' || item.status === 'in_progress').length;
+    }
+    return parsed.length;
+  } catch {
+    return 0;
+  }
+};
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-  { name: 'Subjects', path: '/subjects', icon: BookOpen, badge: '4' },
-  { name: 'Assignments', path: '/assignments', icon: FileCheck2, badge: '3' },
-  { name: 'Study Resources', path: '/resources', icon: FolderKanban },
-  { name: 'Study Tasks', path: '/tasks', icon: CheckSquare, badge: '5' },
+  { name: 'Subjects', path: '/subjects', icon: BookOpen, getBadge: () => getStoredCount('studyhub_subjects') || '4' },
+  { name: 'Assignments', path: '/assignments', icon: FileCheck2, getBadge: () => getStoredCount('studyhub_assignments', true) || '3' },
+  { name: 'Study Resources', path: '/resources', icon: FolderKanban, getBadge: () => getStoredCount('studyhub_resources') || '5' },
+  { name: 'Study Tasks', path: '/tasks', icon: CheckSquare, getBadge: () => getStoredCount('studyhub_tasks', true) || '3' },
 ];
 
 const getInitials = (name?: string): string => {
@@ -38,6 +53,7 @@ const getInitials = (name?: string): string => {
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
+
 
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const { currentUser, logout } = useAuth();
@@ -119,20 +135,25 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       />
                       <span>{item.name}</span>
                     </div>
-                    {item.badge && (
-                      <span
-                        className={`px-2 py-0.5 text-[11px] font-semibold rounded-full ${
-                          isActive
-                            ? 'bg-brand-200 text-brand-800'
-                            : 'bg-surface-100 text-surface-600'
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
+                    {(() => {
+                      const badge = item.getBadge ? item.getBadge() : undefined;
+                      if (!badge) return null;
+                      return (
+                        <span
+                          className={`px-2 py-0.5 text-[11px] font-semibold rounded-full ${
+                            isActive
+                              ? 'bg-brand-200 text-brand-800'
+                              : 'bg-surface-100 text-surface-600'
+                          }`}
+                        >
+                          {badge}
+                        </span>
+                      );
+                    })()}
                   </>
                 )}
               </NavLink>
+
             );
           })}
         </nav>
