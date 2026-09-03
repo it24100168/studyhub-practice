@@ -4,6 +4,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../..
 import { Button } from '../../components/ui/Button';
 import { Badge } from '../../components/ui/Badge';
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from '../../components/ui/Table';
+import { useAuth } from '../auth';
 import {
   BookOpen,
   FileCheck2,
@@ -16,12 +17,16 @@ import {
 } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
+  const { currentUser } = useAuth();
+  const firstName = currentUser?.name ? currentUser.name.split(' ')[0] : 'Student';
+
   return (
     <div className="space-y-6">
       <PageHeader
         title="Academic Dashboard"
-        description="Welcome back, Alex! Here is an overview of your current academic progress, upcoming deadlines, and study stats."
+        description={`Welcome back, ${firstName}! Here is an overview of your current academic progress, upcoming deadlines, and study stats.`}
         badge={<Badge variant="primary" withDot>Fall 2026</Badge>}
+
         actions={
           <div className="flex gap-2">
             <Button variant="outline" size="sm" icon={<Calendar className="w-4 h-4" />}>

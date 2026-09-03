@@ -6,11 +6,24 @@ import { SubjectsPage } from '../features/subjects/SubjectsPage';
 import { AssignmentsPage } from '../features/assignments/AssignmentsPage';
 import { ResourcesPage } from '../features/resources/ResourcesPage';
 import { TasksPage } from '../features/tasks/TasksPage';
+import { LoginPage, RegisterPage, ProtectedRoute } from '../features/auth';
 
 export const AppRoutes: React.FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<AppLayout />}>
+      {/* Public Auth Routes */}
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+
+      {/* Protected App Routes */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute>
+            <AppLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<DashboardPage />} />
         <Route path="subjects" element={<SubjectsPage />} />
         <Route path="assignments" element={<AssignmentsPage />} />
@@ -21,3 +34,4 @@ export const AppRoutes: React.FC = () => {
     </Routes>
   );
 };
+

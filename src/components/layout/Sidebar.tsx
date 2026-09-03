@@ -8,7 +8,9 @@ import {
   CheckSquare,
   GraduationCap,
   X,
+  LogOut,
 } from 'lucide-react';
+import { useAuth } from '../../features/auth';
 
 export interface SidebarProps {
   isOpen: boolean;
@@ -30,7 +32,17 @@ const navItems: NavItem[] = [
   { name: 'Study Tasks', path: '/tasks', icon: CheckSquare, badge: '5' },
 ];
 
+const getInitials = (name?: string): string => {
+  if (!name) return 'U';
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
 export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
+  const { currentUser, logout } = useAuth();
+  const initials = getInitials(currentUser?.name);
+
   return (
     <>
       {/* Mobile Backdrop */}
@@ -125,19 +137,35 @@ export const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
           })}
         </nav>
 
-        {/* Footer Info / User status preview */}
-        <div className="p-4 border-t border-surface-100 bg-surface-50/50">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs">
-              JS
+        {/* Footer Info / User status preview with Logout */}
+        <div className="p-3 border-t border-surface-100 bg-surface-50/50 flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-xs shrink-0">
+              {initials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-semibold text-surface-800 truncate">Alex Morgan</p>
-              <p className="text-[11px] text-surface-500 truncate">Computer Science &bull; Term 4</p>
+              <p className="text-xs font-semibold text-surface-800 truncate">
+                {currentUser?.name || 'Alex Morgan'}
+              </p>
+              <p className="text-[11px] text-surface-500 truncate">
+                {currentUser?.email || 'Student'}
+              </p>
             </div>
           </div>
+          <button
+            onClick={() => {
+              onClose();
+              logout();
+            }}
+            className="p-1.5 rounded-lg text-surface-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+            title="Sign Out"
+            aria-label="Sign Out"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         </div>
       </aside>
     </>
   );
 };
+
